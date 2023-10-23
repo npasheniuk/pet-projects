@@ -1,0 +1,522 @@
+## Регресійний аналіз
+
+library(ggplot2)
+library(MASS)
+
+
+## Підгонка лінійних моделей
+?cars
+
+# Завантажуємо дані
+data("cars", package = "datasets")
+
+# Попередня обробка даних
+plot(dist ~ speed, data = cars, pch = 20, 
+     main = "Залежність гальмівного шляху автомобілів 
+     20-х від швидкості")
+hist(cars$dist, freq = F,  main = "Гістограма гальмівного шляху")
+boxplot(cars$dist)
+cor.test(cars$speed, cars$dist)
+
+
+# Будуємо лінійну модель
+model <- lm(dist ~ speed, data = cars)
+model
+# Вся інформація щодо побудованої моделі
+summary(model)
+
+# Можна використати функцію names(), щоб з'ясувати, яку інформацію 
+# містить модель model:
+names(model)
+coef(model)
+
+# Надійні інтервали
+confint(model)
+# або -- функція predict(), нижче.
+
+# Зображуємо модель регресії
+
+plot(dist ~ speed, data = cars, pch = 20, 
+     main = "Залежність гальмівного шляху 
+    автомобілів 20-х від швидкості")
+abline(model, col = "blue")
+
+ggplot(mydata, aes(speed, dist)) +
+  geom_point() +
+  stat_smooth()
+
+ggplot(mydata, aes(speed, dist)) +
+  geom_point() +
+  stat_smooth(method = lm, se = F)
+
+ggplot(mydata, aes(speed, dist)) +
+  geom_point() +
+  stat_smooth(method = lm)
+
+my_mtcars = mtcars
+plot(mpg ~ wt, data = my_mtcars)
+my_mtcars$vs <- factor(my_mtcars$vs, labels = c("V", "S"))
+my_mtcars$am <- factor(my_mtcars$am, labels = c("auto", "manual"))
+my_mtcars$cyl <- as.factor(mtcars$cyl)
+model.1 <- lm(mpg ~ wt, data = my_mtcars)
+summary(model.1)
+
+ggplot(my_mtcars, aes(wt, mpg)) +
+  geom_point() +
+  stat_smooth()
+
+ggplot(my_mtcars, aes(wt, mpg)) +
+  geom_point() +
+  stat_smooth(method = lm)
+
+ggplot(my_mtcars, aes(wt, mpg, col = am)) +
+  geom_point() +
+  stat_smooth(method = lm)
+
+ggplot(my_mtcars, aes(wt, mpg, col = vs)) +
+  geom_point() +
+  stat_smooth(method = lm)
+
+ggplot(my_mtcars, aes(wt, mpg, col = cyl)) +
+  geom_point() +
+  stat_smooth(method = lm)
+
+
+ggplot(my_mtcars, aes(wt, mpg, col = am)) +
+  geom_point() +
+  stat_smooth(method = lm)+
+  facet_grid( ~ vs)
+
+
+# Надійні інтервали для коефіцієнтів.
+# Оцінки коефіцієнтів -- це випадкові величини, для різних вибірок матимуть різні значення.
+# Згенеруємо три вектори випадкових похибок, які додамо до заданої функції:
+x = seq(from = 0, to = 2, by = 0.1)
+y = 2*x + 5
+z = data.frame(y + rnorm(21), y + rnorm(21), y + rnorm(21))
+
+plot(x, z[,1])
+plot(x, z[,2])
+plot(x, z[,3])
+
+plot(x, y)
+abline(reg = lm(z[,1] ~ x), col = "blue")
+abline(reg = lm(z[,2] ~ x), col = "red")
+abline(reg = lm(z[,3] ~ x), col = "green")
+
+library(ggplot2)
+ggplot(data.frame(x, z)) +
+  geom_point(aes(x, z[,1]))+  
+  geom_point(aes(x, z[,2]), col = "red")+
+  geom_point(aes(x, z[,3]), col = "green")+
+  geom_abline(slope =  2, intercept = 5, color = "black")
+
+
+ggplot(data.frame(x, z)) +
+  stat_smooth(aes(x, z[,1]), method = lm) +
+  stat_smooth(aes(x, z[,2]), method = lm, col = "red", se = F)+
+  stat_smooth(aes(x, z[,3]), method = lm, col = "green", se = F)+
+  geom_abline(slope =  2, intercept = 5, color = "black")
+
+ggplot(data.frame(x, z)) +
+  geom_point(aes(x, z[,1]))+  
+  geom_point(aes(x, z[,2]), col = "red")+
+  geom_point(aes(x, z[,3]), col = "green")+
+  stat_smooth(aes(x, z[,1]), method = lm) + # надійний інт. будується лише для цієї моделі
+  stat_smooth(aes(x, z[,2]), method = lm, col = "red", se = F)+
+  stat_smooth(aes(x, z[,3]), method = lm, col = "green", se = F)+
+  geom_abline(slope =  2, intercept = 5, color = "black")
+
+a <- rnorm(63, c(0, 0, 0), c(1, 2, 1.5))
+b <- 2*x + 5 + a
+d <- letters[1:3]
+df <- data.frame(x, b, d)
+
+ggplot(df, aes(x, b, color = d))+
+    geom_point()+
+    stat_smooth(method = lm, se = F)+
+    geom_abline(slope =  2, intercept = 5, color = "black")
+
+ggplot(df, aes(x, b, color = d))+
+  geom_point()+
+  stat_smooth(method = lm)+
+  geom_abline(slope =  2, intercept = 5, color = "black")+
+  facet_wrap(~d)
+
+
+# Датасет - діаманти
+library(ggplot2)
+library(car)
+ideal.diamonds <- subset(diamonds, cut == "Ideal")
+ideal.diamonds <- ideal.diamonds[c("carat", "depth", "table", "price")]
+pairs(ideal.diamonds)
+diam.model <- lm(price ~ carat, ideal.diamonds)
+summary(diam.model)
+plot(price ~ carat, data = ideal.diamonds, pch = 20, 
+     main = "Залежність ціни діамантів від ваги (в каратах)")
+abline(diam.model, col = "blue")
+
+plot(c(1:length(ideal.diamonds$price)), resid(diam.model), xlab = "Порядковий номер", ylab = "Значення залишків", 
+     main = "Значення залишків за порядковим номером")
+abline(h = 0)
+plot(c(1:length(ideal.diamonds$price)), resid(diam.model)/sd(resid(diam.model)), xlab = "Порядковий номер", 
+     ylab = "Значення стьюдентизованих залишків", 
+     main = "Значення стьюдентизованих залишків за порядковим номером")
+abline(h = 0)
+
+
+
+
+# Передбачення для нового набору даних
+?predict
+fitted_values_mpg <- data.frame(mpg = my_mtcars$mpg, fitted = model.1$fitted.values)
+
+plot(fitted_values_mpg)
+abline(0,1)
+
+
+new_wt <- data.frame(wt = c(4.5, 5, 8))
+predict(model.1, new_wt)
+new_wt <- data.frame(wt = c(4.5, 5, 6.5))
+predict(model.1, new_wt)
+
+# Додамо ці дані до змінних
+new_wt$mpg <- predict(model.1, new_wt) # результати передбачення
+
+
+
+
+new.speeds <- data.frame(speed = c(5, 21, 27))  # Створюємо датафрейм з новими даними незалежної змінної
+predict(model, newdata = new.speeds)   # Передбачення значень залежної змінної в нових точках
+predict(model, newdata = new.speeds, interval = "confidence") # Надійні інтервали для значень прогнозу
+
+# Зображення лінії регресії разом з надійним та прогнозним інтервалами
+pred.int <- predict(model, interval = "prediction") 
+mydata <- cbind(cars, pred.int) # Додаємо значення прогнозних інтервалів до базового датасету
+
+library("ggplot2")
+p <- ggplot(mydata, aes(speed, dist)) +
+  geom_point() +
+  stat_smooth(method = lm)
+# Додаємо прогнозні інтервали
+p + geom_line(aes(y = lwr), color = "red", linetype = "dashed")+
+  geom_line(aes(y = upr), color = "red", linetype = "dashed")
+
+
+# Аналіз залишків  моделі
+# Якщо 4 рази запустити функцію plot(model) -- результатом буде  
+# 4 графіка, які аналізують залишки.
+plot(model)
+?plot.lm
+
+plot(1:20, 1:20, pch = 1:20)
+
+# Leverage statistics
+?hatvalues
+hatvalues(model)  # n x M matrix, with positive values
+hatplot(model, las = 1, col = "blue") 
+??hatplot
+
+
+resid(model)
+plot(c(1:length(cars$dist)), resid(model), xlab = "Порядковий номер", ylab = "Значення залишків", 
+     main = "Значення залишків за порядковим номером")
+abline(h = 0)
+plot(c(1:length(cars$dist)), resid(model)/sd(resid(model)), xlab = "Порядковий номер", 
+     ylab = "Значення стьюдентизованих залишків", 
+     main = "Значення стьюдентизованих залишків за порядковим номером")
+abline(h = 0)
+
+# Діаграма "відгук-прогноз"
+plot(cars$dist ~ fitted(model), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Значення спостережень", main = "Діаграма \"відгук-прогноз\" ")
+abline(0, 1)
+
+# Діаграма "прогноз-залишки"
+plot(resid(model) ~ fitted(model), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Залишки моделі", main = "Діаграма \"прогноз-залишки\" ")
+abline(h = 0)
+
+# Перевірка нормальності залишків.
+hist(resid(model), freq = F, main = "Гістограма залишків", xlab = "Залишки моделі", 
+     ylab = "Відносні частоти")
+qqnorm(resid(model), main = "Q-Q-діаграма для залишків моделі", xlab = "Теоретичні квантилі", 
+       ylab = "Емпіричні квантилі")
+qqline(resid(model))
+
+#   Розширення лінійної моделі
+# Поліном dist = b_0 + b_1*speed + b_1*speed^2 +\eps -- множинна лінійна!
+model3 <- lm(dist ~ speed + I(speed^2)-1, data = cars)
+model3
+# Вся інформація щодо побудованої моделі
+summary(model3)
+
+ggplot(mydata, aes(speed + I(speed^2), dist)) +
+  geom_point() +
+  stat_smooth(method = lm, se = F)
+
+
+
+# Датасет Boston з пакету MASS
+library(MASS)
+library(corrplot)
+?Boston
+View(Boston)
+my_Boston <- Boston[c(1, 5, 7, 8, 13, 14)]
+pairs(Boston[c(1, 5, 7, 8, 13, 14)])
+
+ggplot(my_Boston, aes(x = lstat, y = medv, col = dis)) + 
+  geom_point()  + 
+  geom_smooth()
+
+cor(my_Boston)
+corrplot(cor(my_Boston), addCoef.col = "black", order = "hclust")
+mod2.lm <- lm(medv ~ lstat + nox, data = Boston)
+summary(mod2.lm)
+mod.total <-  lm(medv ~ ., data = my_Boston)
+summary(mod.total)
+mod3.lm <- lm(medv ~ lstat + nox + dis, data = my_Boston)
+summary(mod3.lm)
+plot(mod3.lm)
+plot(my_Boston$medv ~ fitted(mod3.lm), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Значення спостережень", main = "Діаграма \"відгук-прогноз\" ")
+abline(0, 1)
+mod4.lm <- lm(medv ~ lstat + I(lstat^2) + nox + dis, data = my_Boston)
+summary(mod4.lm)
+plot(mod4.lm)
+mod5.lm <- lm(medv ~  lstat + I(lstat^2) + dis, data = my_Boston)
+summary(mod5.lm)
+plot(my_Boston$medv ~ fitted(mod5.lm), xlab = "Прогнозовані моделлю 5 значення", 
+     ylab = "Значення спостережень", main = "Діаграма \"відгук-прогноз\" ")
+abline(0, 1)
+
+plot(my_Boston$medv ~ fitted(mod4.lm), xlab = "Прогнозовані моделлю 4 значення", 
+     ylab = "Значення спостережень", main = "Діаграма \"відгук-прогноз\" для моделі 4")
+abline(0, 1)
+
+mod6.lm <- lm(medv ~ poly(lstat, 4) + dis, data = my_Boston)
+summary(mod6.lm)
+
+
+# Порівняння двох моделей
+
+anova(mod5.lm, mod4.lm)
+
+# Автоматичний вибір предикторів моделі
+
+optimal_mod <-  step(mod.total , direction = 'backward')
+summary(optimal_mod)
+opt1.mod <- lm(medv ~ lstat + I(lstat^2) +crim + nox + dis, data = my_Boston)
+summary(opt1.mod)
+plot(my_Boston$medv ~ fitted(opt1.mod), xlab = "Прогнозовані моделлю opt1 значення", 
+     ylab = "Значення спостережень", main = "Діаграма \"відгук-прогноз\" ")
+abline(0, 1)
+
+plot(resid(mod4.lm) ~ fitted(mod4.lm), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Залишки моделі", main = "Діаграма \"прогноз-залишки\" для моделі 4")
+abline(h = 0)
+plot(resid(opt1.mod) ~ fitted(opt1.mod), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Залишки моделі", main = "Діаграма \"прогноз-залишки\" для моделі opt1")
+abline(h = 0)
+
+
+pairs(log(my_Boston))
+opt2.mod <- lm(log(medv) ~ log(lstat +crim + nox + dis), data = my_Boston)
+summary(opt2.mod)
+plot(resid(opt2.mod) ~ fitted(opt1.mod), xlab = "Прогнозовані моделлю значення", 
+     ylab = "Залишки моделі", main = "Діаграма \"прогноз-залишки\" для моделі opt2")
+abline(h = 0)
+
+opt3.mod <- lm(log(medv) ~ log(lstat) + log(crim) + log(nox), data = my_Boston)
+summary(opt3.mod)
+
+opt4.mod <- lm(log(medv) ~ log(lstat) + log(crim), data = my_Boston)
+summary(opt4.mod)
+
+anova(opt3.mod, opt4.mod)
+
+opt2.mod <- lm(log(medv) ~ log(lstat +crim + nox + dis), data = my_Boston)
+summary(opt2.mod)
+anova(opt3.mod, opt2.mod)
+
+log_Boston <- log(my_Boston)
+pairs(log_Boston)
+corrplot(cor(log_Boston), addCoef.col = "black", order = "hclust")
+mod1.log.total <-  lm(medv ~ ., data = log_Boston)
+summary(mod1.log.total)
+opt_mod_log <-  step(mod1.log.total, direction = 'backward')
+summary(opt_mod_log)
+opt1_mod_log <-  lm(medv ~ . - dis, data = log_Boston)
+summary(opt1_mod_log)
+opt2_mod_log <-  lm(medv ~ . - nox, data = log_Boston)
+summary(opt2_mod_log)
+
+?vif
+
+
+plot(medv ~ lstat, data = Boston, pch = 20, 
+     main = "Залежність медіани вартості житла 
+     від відсотку жителів низького соціального статусу")
+abline(mod2.lm, col = "blue", lwd = 3)
+
+
+
+
+
+
+
+##  Модельовані приклади
+
+library(lmtest)
+
+#  "Правильна" модель, в якій не повинно бути жодних проблем
+sim_1 = function(sample_size = 500) {
+  x = runif(n = sample_size) * 5
+  y = 3 + 5 * x + rnorm(n = sample_size, mean = 0, sd = 1)
+  data.frame(x, y)
+}    
+
+sim_data_1 = sim_1()
+plot(y ~ x, data = sim_data_1, col = "grey", pch = 20,
+     main = "Data from Model 1")
+fit_1 = lm(y ~ x, data = sim_data_1)
+abline(fit_1, col = "darkorange", lwd = 3)
+
+plot(fitted(fit_1), resid(fit_1), col = "grey", pch = 20,
+     xlab = "Fitted", ylab = "Residuals", main = "Data from Model 1")
+abline(h = 0, col = "darkorange", lwd = 2)
+
+bptest(fit_1)
+
+
+
+
+# Модель, в якій порушено умову гомоскедастичності - 
+# тут дисперсія залишків неоднорідна, вона залежить від предиктора
+sim_2 = function(sample_size = 500) {
+  x = runif(n = sample_size) * 5
+  y = 3 + 5 * x + rnorm(n = sample_size, mean = 0, sd = x)
+  data.frame(x, y)
+}  
+
+sim_data_2 = sim_2()
+fit_2 = lm(y ~ x, data = sim_data_2)
+plot(y ~ x, data = sim_data_2, col = "grey", pch = 20,
+     main = "Data from Model 2")
+abline(fit_2, col = "darkorange", lwd = 3)
+
+plot(fitted(fit_2), resid(fit_2), col = "grey", pch = 20,
+     xlab = "Fitted", ylab = "Residuals", main = "Data from Model 2")
+abline(h = 0, col = "darkorange", lwd = 2)
+
+bptest(fit_2)
+
+
+# Модель з неадекватною функціональною залежністю -
+# тут справжня залежність нелінійна
+sim_3 = function(sample_size = 500) {
+  x = runif(n = sample_size) * 5
+  y = 3 + 5 * x ^ 2 + rnorm(n = sample_size, mean = 0, sd = 5)
+  data.frame(x, y)
+}   
+
+sim_data_3 = sim_3()
+fit_3 = lm(y ~ x, data = sim_data_3)
+plot(y ~ x, data = sim_data_3, col = "grey", pch = 20,
+     main = "Data from Model 3")
+abline(fit_3, col = "darkorange", lwd = 3)
+
+plot(fitted(fit_3), resid(fit_3), col = "grey", pch = 20,
+     xlab = "Fitted", ylab = "Residuals", main = "Data from Model 3")
+abline(h = 0, col = "darkorange", lwd = 2)
+
+bptest(fit_3)
+
+# Перевірка припущення про нормальність залишків
+
+hist(resid(fit_1),
+     xlab   = "Residuals",
+     main   = "Histogram of Residuals, fit_1",
+     col    = "darkorange",
+     border = "dodgerblue",
+     breaks = 20)
+hist(resid(fit_2),
+     xlab   = "Residuals",
+     main   = "Histogram of Residuals, fit_2",
+     col    = "darkorange",
+     border = "dodgerblue",
+     breaks = 20)
+hist(resid(fit_3),
+     xlab   = "Residuals",
+     main   = "Histogram of Residuals, fit_3",
+     col    = "darkorange",
+     border = "dodgerblue",
+     breaks = 20)
+
+# Перша гістограма виглядає дуже нормальною, друга - симетрична, але занадто гостра, третя - помінто асиметрична.
+
+qqnorm(resid(fit_1), main = "Normal Q-Q Plot, fit_1", col = "darkgrey")
+qqline(resid(fit_1), col = "dodgerblue", lwd = 2)  # Бездоганний
+
+qqnorm(resid(fit_2), main = "Normal Q-Q Plot, fit_2", col = "darkgrey")
+qqline(resid(fit_2), col = "dodgerblue", lwd = 2)  #  Підозрілий
+
+qqnorm(resid(fit_3), main = "Normal Q-Q Plot, fit_3", col = "darkgrey")
+qqline(resid(fit_3), col = "dodgerblue", lwd = 2)  # Не менш підозрілий
+
+shapiro.test(resid(fit_1))
+shapiro.test(resid(fit_2))
+shapiro.test(resid(fit_3))
+
+## Аномальні спостереження. Змодельований приклад.
+
+ex_data  = data.frame(x = 1:10,
+                      y = 10:1 + rnorm(n = 10))
+ex_model = lm(y ~ x, data = ex_data)
+plot(ex_data)
+
+# low leverage, large residual, small influence
+point_1 = c(5.4, 11)
+ex_data_1 = rbind(ex_data, point_1)
+model_1 = lm(y ~ x, data = ex_data_1)
+plot(y ~ x, data = ex_data_1, cex = 2, pch = 20, col = "grey",
+     main = "Low Leverage, Large Residual, Small Influence")
+points(x = point_1[1], y = point_1[2], pch = 1, cex = 4, col = "black", lwd = 2)
+abline(ex_model, col = "dodgerblue", lwd = 2)
+abline(model_1, lty = 2, col = "darkorange", lwd = 2)
+legend("bottomleft", c("Original Data", "Added Point"),
+       lty = c(1, 2), col = c("dodgerblue", "darkorange"))
+
+# high leverage, small residual, small influence
+point_2 = c(18, -5.7)
+ex_data_2 = rbind(ex_data, point_2)
+model_2 = lm(y ~ x, data = ex_data_2)
+plot(y ~ x, data = ex_data_2, cex = 2, pch = 20, col = "grey",
+     main = "High Leverage, Small Residual, Small Influence")
+points(x = point_2[1], y = point_2[2], pch = 1, cex = 4, col = "black", lwd = 2)
+abline(ex_model, col = "dodgerblue", lwd = 2)
+abline(model_2, lty = 2, col = "darkorange", lwd = 2)
+legend("bottomleft", c("Original Data", "Added Point"),
+       lty = c(1, 2), col = c("dodgerblue", "darkorange"))
+
+# high leverage, large residual, large influence
+point_3 = c(14, 5.1)
+ex_data_3 = rbind(ex_data, point_3)
+model_3 = lm(y ~ x, data = ex_data_3)
+plot(y ~ x, data = ex_data_3, cex = 2, pch = 20, col = "grey", ylim = c(-3, 12),
+     main = "High Leverage, Large Residual, Large Influence")
+points(x = point_3[1], y = point_3[2], pch = 1, cex = 4, col = "black", lwd = 2)
+abline(ex_model, col = "dodgerblue", lwd = 2)
+abline(model_3, lty = 2, col = "darkorange", lwd = 2)
+legend("bottomleft", c("Original Data", "Added Point"),
+       lty = c(1, 2), col = c("dodgerblue", "darkorange"))
+
+coef(ex_model)
+coef(model_1) # малий вплив на кут нахилу модельної прямої (low leverage). 
+# Це -викид, оскільки він має велике ст. відхилення, проте вплив на модель він має не дуже великий.
+coef(model_2) # Має також невеликий вплив на кут нахилу, ця точка має "high leverage", 
+# не є викидом через те, що має мале відхилення.
+coef(model_3)  # суттєвий вплив на кут нахилу прямої.
+# Ця точка є впливовим аномальним спостереженням (influential). Має і великий важель (high leverage), 
+# та є викидом через те, що має велике стандартне відхилення.
+

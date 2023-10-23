@@ -1,0 +1,43 @@
+library(ggplot2)
+library(astsa)
+library(forecast)
+library(TTR)
+library(MLmetrics)
+
+df<-read.csv("Rainfall_1901_1975_PAK.csv", stringsAsFactors = TRUE)
+data = ts(df$Rainfall, df$Year, frequency = 12, start = c(1901, 1), end = c(1975, 12))
+plot(data, xlab = 'Year', ylab = 'Rainfall')
+ggseasonplot(data, polar = T)
+ggseasonplot(data)
+
+plot.ts(SMA(data, n=5))
+plot.ts(SMA(data, n=10))
+plot.ts(SMA(data, n=20))
+plot.ts(SMA(data, n=50))
+plot.ts(SMA(data, n=100))
+
+DecDATA <- decompose(data)
+plot(DecDATA)
+
+acf(data)
+pacf(data)
+
+ar(data)
+
+data.1 <- meanf(data, h=12)
+data.2 <- rwf(data, h=12)
+data.3 <- snaive(data, h=12)
+data.4 <- rwf(data, drift = TRUE, h=12)
+autoplot(window(data, start=1951)) +
+  autolayer(data.1, series="Mean", PI=FALSE) +
+  autolayer(data.2, series="Naïve", PI=FALSE) +
+  autolayer(data.3, series="Seasonal naïve", PI=FALSE) +
+  autolayer(data.4, series="Drift method", PI=FALSE) +
+  xlab("Years") + ylab("Rainfall") +
+  ggtitle(" ")
+
+train.Rainfall <- window(data, start = c(1901, 1), end = c(1965, 12))
+valid.Rainfall <- window(data, start = c(1966, 1))
+Rainfall.naive <- snaive(train.Rainfall, h = length(valid.Rainfall))
+plot(data, col="blue", xlab="Year", ylab="Rainfall", main="Seasonal Naive Forecast", type='l')
+lines(Rainfall.naive$mean, col="red", lwd=2)

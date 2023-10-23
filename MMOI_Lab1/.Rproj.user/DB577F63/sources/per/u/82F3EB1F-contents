@@ -1,0 +1,52 @@
+library(psych)
+library(ggplot2)
+library(nortest)
+
+#------------------------------------1
+df<-read.csv("dataset_1.csv", stringsAsFactors = TRUE)
+main_column<-na.omit(df$Have_Understanding_Parents)
+df_mean<-mean(main_column)
+cat('Mean of column: ', df_mean)
+df_median<-median(main_column)
+cat('Median of column: ', df_median)
+#------------------------------------2
+df_dispersion<-var(main_column)
+cat('Dispersion of column: ', df_dispersion)
+df_standart_deviation<-sd(main_column)
+cat('Standart deviation of column: ', df_standart_deviation)
+df_coefficient_of_variation<-df_standart_deviation/df_mean
+cat('Coefficient of variation of column: ', df_coefficient_of_variation)
+df_range_of_variation<-max(main_column)-min(main_column)
+cat('Range of variation of column: ', df_range_of_variation)
+df_interval_swing<-IQR(main_column)
+cat('Interval swing of column: ', df_interval_swing)
+#------------------------------------3
+boxplot(x, ylab = 'Understanding Parents, percent', main = 'Suicide people have understanding parents', las = 1)
+#------------------------------------4
+df_five_point_characteristic<-quantile(main_column, probs = seq(0, 1, 0.25))
+cat('Five-point characteristic of column: ', df_five_point_characteristic)
+#------------------------------------5
+df_1_9_deciles<-quantile(main_column, probs = c(0.1, 0.9))
+cat('1st and 9th deciles of column: ', df_1_9_deciles)
+#------------------------------------6
+df_skewness<-mean((main_column-mean(main_column))^3)/sd(main_column)^3
+cat('Skewness of column: ', df_skewness)
+df_kurtosis<-(mean((main_column-mean(main_column))^4)/sd(main_column)^4) - 3
+cat('Kurtosis of column: ', df_kurtosis)
+#------------------------------------7
+hist(main_column, breaks = 1 + log(length(x), 2), xlab = "Understanding Parents", main = "Base rule", ylab ="Density", freq = FALSE)
+lines(density(main_column), col = "blue", lwd = 2)
+
+hist(main_column, breaks=seq(0, 80, length.out = nclass.scott(main_column)), main = "Base rule(Scott)", prob=T, right=F, xlab="Understanding Parents", ylab="Density")
+lines(density(main_column), col = "red", lwd = 2)
+
+hist(main_column, breaks=seq(0, 80, length.out = nclass.FD(main_column)), prob=T, right=F, xlab="Understanding Parents", main = "Base rule(FD)", ylab="Density")
+lines(density(main_column), col = "red", lwd = 2)
+#------------------------------------8
+qqnorm(main_column)
+qqline(main_column, col="red")
+#------------------------------------9
+plot(pnorm(sort(main_column), df_mean, df_standart_deviation), (1:length(main_column))/length(main_column), xlab="Theoretical", ylab="Empirical")
+abline(0, 1, col="red")
+#------------------------------------10
+lillie.test(main_column)

@@ -1,0 +1,59 @@
+---
+title: "MMOI_Lab4"
+output: html_document
+date: "2022-11-08"
+---
+
+Бібліотеки
+
+```{r}
+library(ggplot2)
+```
+
+Датасет
+
+```{r}
+df<-read.csv("top10s.csv", stringsAsFactors = TRUE)
+```
+
+Лінійна діаграма
+
+```{r}
+df$year <- factor(df$year)
+stripchart(dnce ~ year, data = df, xlab = "Danceability",  
+           ylab ="Year", col=c("red", "green", "blue", "purple", "black", "brown", "pink", "orange", "grey", "yellow"), 
+           method = "jitter")
+boxplot(dnce ~ year, data = df, xlab = "Danceability",  
+           ylab ="Year", col=c("red", "green", "blue", "purple", "magenta", "brown", "pink", "orange", "grey", "yellow"), main = "Danceability per year")
+aggregate(x = df$dnce, by = list(df$year), FUN = mean)
+```
+
+Дисперсійний аналіз
+
+```{r}
+summary(aov(dnce ~ year, data = df))
+summary(lm(dnce ~ year, data = df))
+```
+
+Перевірка нормальності ANOVA
+
+```{r}
+ggplot(df, aes(sample = dnce, col = year))+
+  geom_qq()+
+  facet_grid( ~ year, space = "free")
+hist(aov(dnce ~ year, data = df)$residuals, main = "Гістограма залишків моделі", freq = F, col = "green1")
+shapiro.test(aov(dnce ~ year, data = df)$residuals)
+kruskal.test(dnce ~ year, data = df)
+bartlett.test(df$dnce ~ df$year)
+tapply(df$dnce, df$year, var)
+```
+
+Контрасти
+
+```{r}
+year <- factor(df$year)
+contrasts(year)
+contrasts(year) <- contr.sum
+contrasts(year)
+summary(lm(dnce ~ year, data = df))
+```

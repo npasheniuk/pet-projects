@@ -1,0 +1,152 @@
+---
+title: "MMOI_Lab6"
+output: html_document
+date: "2022-11-29"
+---
+
+```{r}
+library("cluster")
+library("ggplot2")
+library("factoextra")
+library("NbClust")
+library("see")
+library("parameters")
+library("fpc")
+df<-read.csv("6_class.csv", stringsAsFactors = TRUE)
+df
+df_add<-scale(df)
+df_add
+head(df_add)
+```
+
+```{r}
+gradient.color <- list(low = "bisque",  high = "coral1")
+get_clust_tendency(df, n = 0.3*nrow(df), gradient = gradient.color)
+get_clust_tendency(df_add, n = 0.3*nrow(df_add), gradient = gradient.color)
+```
+
+```{r}
+df_add.dist <- get_dist(df_add, stand = TRUE, method = "pearson")
+fviz_dist(df_add.dist, gradient = list(low = "bisque", mid = "khaki1", high = "coral1"))
+df_add.dist_nostand <- get_dist(df_add)
+fviz_dist(df_add.dist_nostand, gradient = list(low = "bisque", mid = "khaki1", high = "coral1"))
+```
+
+```{r}
+df_add.hc1 <- hclust(df_add.dist)
+fviz_dend(df_add.hc1)
+fviz_dend(df_add.hc1, k = 2, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1"),
+          color_labels_by_k = TRUE, 
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом  дальнього сусіда")
+fviz_dend(df_add.hc1, k = 4, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1", "khaki1", "darkturquoise"),
+          color_labels_by_k = TRUE, 
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом  дальнього сусіда")
+fviz_dend(df_add.hc1, k = 6, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1", "khaki1", "darkturquoise", "firebrick1", "aquamarine"),
+          color_labels_by_k = TRUE, 
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом  дальнього сусіда")
+df_add.clust4 <- cutree(df_add.hc1, k = 4)
+df_add.clust4
+```
+
+```{r}
+df_add.hc <- hclust(df_add.dist, method = "ward.D2")  
+fviz_dend(df_add.hc)
+fviz_dend(df_add.hc, k = 4, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1", "khaki1", "darkturquoise"),
+          color_labels_by_k = TRUE,
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом Варда")
+df_add.clust4w <- cutree(df_add.hc, k = 4)
+df_add.clust4w
+fviz_dend(df_add.hc)
+fviz_dend(df_add.hc, k = 2, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1"),
+          color_labels_by_k = TRUE,
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом Варда")
+df_add.clust2w <- cutree(df_add.hc, k = 2)
+df_add.clust2w
+```
+
+```{r}
+fviz_nbclust(df_add, kmeans, method = "silhouette") +
+  labs(subtitle = "Метод середнього силуету")
+fviz_nbclust(df_add, kmeans, nstart = 25, method = "gap_stat",
+  nboot = 500 
+)+
+  labs(subtitle = "Метод статистики розриву")
+fviz_nbclust(df_add, kmeans, method = "wss") +
+  geom_vline(xintercept = 4, linetype = 2) + 
+  labs(subtitle = "Метод ліктя")
+df_add.hc <- hclust(df_add.dist, method = "ward.D2")  
+fviz_dend(df_add.hc)
+fviz_dend(df_add.hc, k = 9, 
+          cex = 1, 
+          k_colors = c("bisque", "coral1", "khaki1", "darkturquoise", "blue", "orange1", "tomato3", "brown1", "yellow"),
+          color_labels_by_k = TRUE,
+          rect = TRUE, 
+          main = "Дендрограма для кластеризації за методом Варда")
+df_add.clust9w <- cutree(df_add.hc, k = 9)
+df_add.clust9w
+```
+
+```{r}
+df_add.kmeans9 <- kmeans(df_add, centers = 9, nstart = 10)
+100 * df_add.kmeans9$betweenss / df_add.kmeans9$totss
+df_add_kmeans_9 <- cluster_analysis(df_add, n = 9, method = "kmeans")
+predict(df_add_kmeans_9)
+plot(df_add_kmeans_9)
+df_add.eclust.km9 <- eclust(df_add, "kmeans", k = 9, nstart = 25)
+df_add.kmeans4 <- kmeans(df_add, centers = 4, nstart = 10)
+100 * df_add.kmeans4$betweenss / df_add.kmeans9$totss
+df_add_kmeans_4 <- cluster_analysis(df_add, n = 4, method = "kmeans")
+predict(df_add_kmeans_4)
+plot(df_add_kmeans_4)
+df_add.eclust.km4 <- eclust(df_add, "kmeans", k = 4, nstart = 25)
+```
+
+```{r}
+dd <- dist(df_add, method ="euclidean")
+clust.df_add.ward9 <- cutree(hclust(dd, method = "ward.D2"), 9)
+km_stats <- cluster.stats(dd, df_add.kmeans9$cluster, alt.clustering = clust.df_add.ward9)
+km_stats$corrected.rand
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
