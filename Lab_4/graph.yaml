@@ -1,0 +1,62 @@
+!!python/object:networkx.classes.graph.Graph
+_adj:
+  A:
+    B: &id001 {}
+    C: &id002 {}
+    D: &id004 {}
+    E: &id007 {}
+    F: &id010 {}
+  B:
+    A: *id001
+    C: &id003 {}
+    D: &id005 {}
+    F: &id011 {}
+    G: &id013 {}
+  C:
+    A: *id002
+    B: *id003
+    D: &id006 {}
+    E: &id008 {}
+    G: &id014 {}
+  D:
+    A: *id004
+    B: *id005
+    C: *id006
+    E: &id009 {}
+    F: &id012 {}
+    G: &id015 {}
+  E:
+    A: *id007
+    C: *id008
+    D: *id009
+  F:
+    A: *id010
+    B: *id011
+    D: *id012
+  G:
+    B: *id013
+    C: *id014
+    D: *id015
+  H:
+    I: &id016 {}
+  I:
+    H: *id016
+  J: {}
+_node:
+  A: {}
+  B: {}
+  C: {}
+  D: {}
+  E: {}
+  F: {}
+  G: {}
+  H: {}
+  I: {}
+  J: {}
+adjlist_inner_dict_factory: &id017 !!python/name:builtins.dict ''
+adjlist_outer_dict_factory: *id017
+edge_attr_dict_factory: *id017
+graph: {}
+graph_attr_dict_factory: *id017
+node_attr_dict_factory: *id017
+node_dict_factory: *id017

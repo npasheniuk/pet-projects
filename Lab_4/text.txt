@@ -1,0 +1,13 @@
+#C:/Users/Admin/PycharmProjects/Lab_4/main.py
+# GMT Fri Apr 30 13:54:50 2021
+# 
+A B D E F C
+C B D E G
+B D F G
+D E F G
+E
+J
+G
+F
+I H
+H
